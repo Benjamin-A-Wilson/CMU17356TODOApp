@@ -3,12 +3,30 @@ body {
     color: #1c2434;
     font-family: Arial, sans-serif;
     margin: 0;
+    min-height: 100vh;
+    position: relative;
+}
+
+/* Decorative background smiley — low contrast, no pointer interference */
+body::before {
+    bottom: 4%;
+    color: rgba(28, 36, 52, 0.07);
+    content: "\263A";
+    font-size: clamp(6rem, 22vw, 12rem);
+    line-height: 1;
+    pointer-events: none;
+    position: fixed;
+    right: 3%;
+    user-select: none;
+    z-index: 0;
 }
 
 .container {
     margin: 0 auto;
     max-width: 900px;
     padding: 1.5rem;
+    position: relative;
+    z-index: 1;
 }
 
 .site-header {
