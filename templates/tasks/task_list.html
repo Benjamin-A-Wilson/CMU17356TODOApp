@@ -30,6 +30,20 @@
 
 <section class="card">
     <h2>All Tasks</h2>
+    <form method="get">
+        <label for="task-search">Search tasks</label>
+        <input
+            id="task-search"
+            name="q"
+            type="text"
+            value="{{ search_query }}"
+            placeholder="Search by title"
+        >
+        <button type="submit">Search</button>
+        {% if search_query %}
+            <a href="{% url 'task-list' %}">Clear</a>
+        {% endif %}
+    </form>
     {% if tasks %}
         <table>
             <thead>

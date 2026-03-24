@@ -31,3 +31,22 @@ class TaskListTests(TestCase):
 
         self.assertEqual(response.status_code, 302)
         self.assertTrue(User.objects.filter(username='newstudent').exists())
+
+    def test_task_list_filters_by_search_query(self):
+        Task.objects.create(user=self.user, title='Buy milk', due_date=timezone.localdate())
+        Task.objects.create(user=self.user, title='Math homework', due_date=timezone.localdate())
+        self.client.login(username='alice', password='password123')
+
+        response = self.client.get(reverse('task-list'), {'q': 'milk'})
+
+        self.assertContains(response, 'Buy milk')
+        self.assertNotContains(response, 'Math homework')
+
+    def test_task_list_search_ignores_other_users_tasks(self):
+        Task.objects.create(user=self.user, title='Project report', due_date=timezone.localdate())
+        Task.objects.create(user=self.other, title='Project report', due_date=timezone.localdate())
+        self.client.login(username='alice', password='password123')
+
+        response = self.client.get(reverse('task-list'), {'q': 'project'})
+
+        self.assertContains(response, 'Project report', count=1)
