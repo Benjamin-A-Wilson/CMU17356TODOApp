@@ -38,12 +38,17 @@ def signup_view(request):
 
 @login_required
 def task_list(request):
-    tasks = Task.objects.filter(user=request.user).order_by('completed', 'due_date')
+    search_query = request.GET.get('q', '').strip()
+    tasks = Task.objects.filter(user=request.user)
+    if search_query:
+        tasks = tasks.filter(title__icontains=search_query)
+    tasks = tasks.order_by('completed', 'due_date')
     today = timezone.localdate()
     due_today = tasks.filter(due_date=today, completed=False)
     overdue = tasks.filter(due_date__lt=today, completed=False)
     context = {
         'tasks': tasks,
+        'search_query': search_query,
         'today': today,
         'due_today': due_today,
         'due_today_titles': list(due_today.values_list('title', flat=True)),
