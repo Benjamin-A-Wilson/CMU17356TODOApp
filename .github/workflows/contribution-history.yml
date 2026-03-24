@@ -1,0 +1,57 @@
+name: Update contribution history
+
+on:
+  pull_request:
+    types:
+      - closed
+
+permissions:
+  contents: write
+
+jobs:
+  append-history:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Append merged PR info to README
+        shell: bash
+        env:
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_DATE: ${{ github.event.pull_request.merged_at }}
+          PR_NAME: ${{ github.event.pull_request.title }}
+        run: |
+          DATE_ONLY="${PR_DATE%%T*}"
+          ENTRY="- ${PR_AUTHOR} ${DATE_ONLY} ${PR_NAME}"
+
+          if grep -q '^## Contribution History$' README.md; then
+            if ! grep -Fxq "$ENTRY" README.md; then
+              printf '%s\n' "$ENTRY" >> README.md
+            fi
+          else
+            {
+              printf '\n## Contribution History\n\n'
+              printf '%s\n' "$ENTRY"
+            } >> README.md
+          fi
+
+      - name: Commit and push changes
+        shell: bash
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          if git diff --quiet README.md; then
+            echo "No README updates needed."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "docs: log merged PR #${PR_NUMBER} in contribution history"
+          git push

@@ -45,3 +45,7 @@ To automate it on Windows, create a Task Scheduler task that runs every morning:
 
 - Run tests with:
   - `python manage.py test`
+
+## Contribution History
+
+- _Merged PRs will be appended here automatically by GitHub Actions._
