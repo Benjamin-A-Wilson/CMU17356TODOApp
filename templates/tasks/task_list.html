@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="card reminder-card">
+    <h2>Today's Focus ({{ today }})</h2>
+    {% if due_today %}
+        <ul>
+            {% for task in due_today %}
+                <li>{{ task.title }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No tasks due today. Nice work.</p>
+    {% endif %}
+    <button id="enable-reminders" type="button">Enable Browser Reminder</button>
+    <p class="hint">If enabled, you'll get a browser notification each morning when you open this app.</p>
+</section>
+
+{% if overdue %}
+<section class="card warning">
+    <h3>Overdue Tasks</h3>
+    <ul>
+        {% for task in overdue %}
+            <li>{{ task.title }} (due {{ task.due_date }})</li>
+        {% endfor %}
+    </ul>
+</section>
+{% endif %}
+
+<section class="card">
+    <h2>All Tasks</h2>
+    {% if tasks %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Task</th>
+                    <th>Due Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in tasks %}
+                    <tr>
+                        <td>
+                            <strong>{{ task.title }}</strong><br>
+                            <small>{{ task.description|default:"No details provided." }}</small>
+                        </td>
+                        <td>{{ task.due_date }}</td>
+                        <td>{% if task.completed %}Completed{% else %}Open{% endif %}</td>
+                        <td class="actions">
+                            <a href="{% url 'task-update' task.pk %}">Edit</a>
+                            <a href="{% url 'task-delete' task.pk %}">Delete</a>
+                            <a href="{% url 'task-toggle' task.pk %}">
+                                {% if task.completed %}Mark open{% else %}Mark done{% endif %}
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No tasks yet. Add one to get started.</p>
+    {% endif %}
+</section>
+
+{{ due_today_titles|json_script:"due-today-data" }}
+<script src="{% static 'js/reminders.js' %}"></script>
+{% endblock %}
